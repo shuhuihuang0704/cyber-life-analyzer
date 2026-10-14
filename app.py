@@ -3,6 +3,7 @@
 from flask import Flask, jsonify, render_template, request
 
 from analyzer import AnalysisInputError, analyze_paths
+from market_data import fetch_comparison_evidence
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
@@ -22,6 +23,18 @@ def analyze():
         result = analyze_paths(payload)
     except AnalysisInputError as exc:
         return jsonify({"error": str(exc)}), 400
+    # The public-data provider receives only this explicit structured scope, never path labels,
+    # background notes, self-ratings or the local comparison/recommendation result.
+    try:
+        result["market_evidence"] = fetch_comparison_evidence(payload.get("market_scope"))
+    except Exception:
+        # Optional network data must never block the independent local scoring result.
+        result["market_evidence"] = {
+            "status": "unavailable",
+            "message": "市场数据暂时不可用；本地评分仍已完成。",
+            "paths": [],
+            "comparability": [],
+        }
     return jsonify(result)
 
 

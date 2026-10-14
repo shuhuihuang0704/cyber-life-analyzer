@@ -3,61 +3,276 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07100f">
+  <meta name="theme-color" content="#1a2723">
   <title>赛博人生分析器 · ORACLE/03</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='2') }}">
-  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='4') }}">
+  <script defer src="{{ url_for('static', filename='app.js', v='4') }}"></script>
 </head>
 <body>
   <div class="shell">
     <header class="topbar">
-      <a class="brand" href="/" aria-label="赛博人生分析器首页"><span class="brand-mark">O</span><span>ORACLE<span class="brand-slash">/</span>03</span></a>
-      <div class="system-status"><i></i> SIMULATION ENGINE <span>ONLINE</span></div>
-      <div class="top-index">个人决策推演 <span>v1.0.4</span></div>
+      <a class="brand" href="/" aria-label="赛博人生分析器首页">
+        <span class="brand-mark" aria-hidden="true">O</span>
+        <span>ORACLE<span class="brand-slash">/</span>03</span>
+      </a>
+      <div class="system-status"><i aria-hidden="true"></i> LOCAL COMPARISON <span>READY</span></div>
+      <div class="top-index">个人决策比较 <span>v2.1</span></div>
     </header>
 
     <main>
       <section class="intro">
         <div class="intro-copy">
-          <p class="eyebrow"><span>01</span> FUTURE SCENARIO MAPPER</p>
-          <h1>把人生的岔路口，<br><em>变成可读的信号。</em></h1>
-          <p class="intro-text">输入两个可能的选择。系统将结合你的状态，推演未来三年的趋势、变量与行动窗口。</p>
+          <p class="eyebrow"><span>01</span> DECISION COMPARISON</p>
+          <h1>把人生的岔路口，<br><em>拆成可以核对的条件。</em></h1>
+          <p class="intro-text">给两条路径做同一套自评，查看权重和得分依据，再选一个 90 天内可以验证的小行动。</p>
         </div>
-        <div class="orbit" aria-hidden="true"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-core">?</div><span class="orbit-label label-a">PATH A</span><span class="orbit-label label-b">PATH B</span><span class="orbit-label label-c">YOU / NOW</span></div>
-        <div class="intro-foot"><span>DECISION SUPPORT SYSTEM</span><span>你的选择 · 你的变量 · 你的下一步</span></div>
+        <div class="orbit" aria-hidden="true">
+          <div class="orbit-ring ring-one"></div>
+          <div class="orbit-ring ring-two"></div>
+          <div class="orbit-core">A/B</div>
+          <span class="orbit-label label-a">PATH A</span>
+          <span class="orbit-label label-b">PATH B</span>
+          <span class="orbit-label label-c">YOUR INPUT</span>
+        </div>
+        <div class="intro-foot"><span>LOCAL DECISION TOOL</span><span>评分是整理思路的工具，不是成功概率</span></div>
       </section>
 
-      <section class="workspace" aria-label="分析工作区">
+      <section class="workspace" aria-label="决策比较工作区">
         <form id="analysis-form" class="input-panel">
-          <div class="panel-heading"><div><span class="section-index">INPUT / 01</span><h2>定义你的分岔</h2></div><span class="live-tag"><i></i> 等待输入</span></div>
-          <label class="field"><span>路径 A <small>你正在考虑的选项</small></span><input name="option_a" maxlength="80" required value="换一份更有成长空间的工作" autocomplete="off"></label>
-          <label class="field"><span>路径 B <small>另一种可能</small></span><input name="option_b" maxlength="80" required value="留在当前岗位继续积累" autocomplete="off"></label>
-          <label class="field"><span>当前背景 <small>哪些现实因素正在影响你？</small></span><textarea name="context" maxlength="300" rows="3" placeholder="例如：存款可支撑 6 个月，最近一年成长变慢……">目前工作稳定，但成长空间有限；希望在收入和长期发展之间找到平衡。</textarea><span class="char-count">0 / 300</span></label>
-          <div class="sliders">
-            <label class="slider-field"><span>风险偏好 <b data-value="risk_tolerance">3</b></span><input type="range" name="risk_tolerance" min="1" max="5" value="3"><small>谨慎 <i>·</i> 愿意探索</small></label>
-            <label class="slider-field"><span>资源储备 <b data-value="resources">3</b></span><input type="range" name="resources" min="1" max="5" value="3"><small>有限 <i>·</i> 充足</small></label>
-            <label class="slider-field"><span>行动紧迫度 <b data-value="urgency">3</b></span><input type="range" name="urgency" min="1" max="5" value="3"><small>不着急 <i>·</i> 需尽快</small></label>
+          <div class="panel-heading">
+            <div><span class="section-index">INPUT / 01</span><h2>定义两条路径</h2></div>
+            <span class="live-tag"><i aria-hidden="true"></i><span id="engine-status">等待输入</span></span>
           </div>
+
+          <label class="field">
+            <span>路径 A <small>你正在考虑的选项</small></span>
+            <input name="option_a" maxlength="80" required autocomplete="off" placeholder="例如：换一份更有成长空间的工作">
+          </label>
+          <label class="field">
+            <span>路径 B <small>另一种可能</small></span>
+            <input name="option_b" maxlength="80" required autocomplete="off" placeholder="例如：留在当前岗位继续积累">
+          </label>
+          <label class="field">
+            <span>当前背景 <small>可选备注，不参与评分</small></span>
+            <textarea name="context" maxlength="300" rows="3" placeholder="例如：存款可支撑 6 个月，最近一年成长变慢……"></textarea>
+            <span class="char-count">0 / 300</span>
+          </label>
+
+          <fieldset class="market-group" aria-describedby="market-help">
+            <legend>可选的行业市场证据</legend>
+            <label class="market-toggle">
+              <input id="market-enabled" type="checkbox" name="market_enabled" value="true">
+              <span>查询公开国家级行业统计</span>
+            </label>
+            <p id="market-help" class="field-help">仅在你勾选并为 A、B 选择国家、行业和年份后查询。当前来源是世界银行年度宏观数据，不含本地岗位数量或职业薪资；路径文字、背景、评分和岗位备注不会发往数据源。</p>
+            <div id="market-controls" class="market-controls" hidden>
+              <div class="market-tools">
+                <p>可填写城市、岗位分类代码与资历范围供自己核对；当前接口不会使用或发送这些字段。</p>
+                <button id="copy-market-scope" class="secondary-button" type="button">复制路径 A 到路径 B</button>
+              </div>
+              <div class="market-scope-grid">
+                <fieldset class="market-path-scope">
+                  <legend>路径 A 范围</legend>
+                  <label class="market-field"><span>国家 / 地区</span>
+                    <select name="market_a_country">
+                      <option value="">请选择国家</option>
+                      <option value="CHN">中国</option><option value="USA">美国</option><option value="DEU">德国</option>
+                      <option value="GBR">英国</option><option value="FRA">法国</option><option value="JPN">日本</option>
+                      <option value="IND">印度</option><option value="CAN">加拿大</option><option value="AUS">澳大利亚</option>
+                      <option value="KOR">韩国</option><option value="SGP">新加坡</option><option value="BRA">巴西</option>
+                    </select>
+                  </label>
+                  <label class="market-field"><span>省份 / 城市 <small>本版不查询该粒度</small></span>
+                    <input name="market_a_city" maxlength="80" autocomplete="off" placeholder="例如：上海">
+                  </label>
+                  <label class="market-field"><span>行业分类</span>
+                    <select name="market_a_industry">
+                      <option value="">请选择行业</option>
+                      <option value="agriculture">农业、林业和渔业</option>
+                      <option value="industry">工业（含建筑业）</option>
+                      <option value="manufacturing">制造业</option>
+                      <option value="services">服务业</option>
+                    </select>
+                  </label>
+                  <label class="market-field"><span>职业 / 岗位分类代码 <small>本版不查询职业数据</small></span>
+                    <input name="market_a_occupation" maxlength="80" autocomplete="off" placeholder="如有官方分类代码可填写">
+                  </label>
+                  <label class="market-field"><span>经验 / 资历</span>
+                    <select name="market_a_seniority">
+                      <option value="">可选</option><option value="entry">入门 / 0–1 年</option>
+                      <option value="mid">中级 / 2–5 年</option><option value="senior">资深 / 6 年以上</option>
+                    </select>
+                  </label>
+                  <div class="market-years">
+                    <label class="market-field"><span>起始年份</span><input type="number" name="market_a_start_year" min="1960" max="2026" value="2020"></label>
+                    <label class="market-field"><span>结束年份</span><input type="number" name="market_a_end_year" min="1960" max="2026" value="2025"></label>
+                  </div>
+                </fieldset>
+                <fieldset class="market-path-scope">
+                  <legend>路径 B 范围</legend>
+                  <label class="market-field"><span>国家 / 地区</span>
+                    <select name="market_b_country">
+                      <option value="">请选择国家</option>
+                      <option value="CHN">中国</option><option value="USA">美国</option><option value="DEU">德国</option>
+                      <option value="GBR">英国</option><option value="FRA">法国</option><option value="JPN">日本</option>
+                      <option value="IND">印度</option><option value="CAN">加拿大</option><option value="AUS">澳大利亚</option>
+                      <option value="KOR">韩国</option><option value="SGP">新加坡</option><option value="BRA">巴西</option>
+                    </select>
+                  </label>
+                  <label class="market-field"><span>省份 / 城市 <small>本版不查询该粒度</small></span>
+                    <input name="market_b_city" maxlength="80" autocomplete="off" placeholder="例如：西雅图">
+                  </label>
+                  <label class="market-field"><span>行业分类</span>
+                    <select name="market_b_industry">
+                      <option value="">请选择行业</option>
+                      <option value="agriculture">农业、林业和渔业</option>
+                      <option value="industry">工业（含建筑业）</option>
+                      <option value="manufacturing">制造业</option>
+                      <option value="services">服务业</option>
+                    </select>
+                  </label>
+                  <label class="market-field"><span>职业 / 岗位分类代码 <small>本版不查询职业数据</small></span>
+                    <input name="market_b_occupation" maxlength="80" autocomplete="off" placeholder="如有官方分类代码可填写">
+                  </label>
+                  <label class="market-field"><span>经验 / 资历</span>
+                    <select name="market_b_seniority">
+                      <option value="">可选</option><option value="entry">入门 / 0–1 年</option>
+                      <option value="mid">中级 / 2–5 年</option><option value="senior">资深 / 6 年以上</option>
+                    </select>
+                  </label>
+                  <div class="market-years">
+                    <label class="market-field"><span>起始年份</span><input type="number" name="market_b_start_year" min="1960" max="2026" value="2020"></label>
+                    <label class="market-field"><span>结束年份</span><input type="number" name="market_b_end_year" min="1960" max="2026" value="2025"></label>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="preference-group">
+            <legend>你的现实偏好</legend>
+            <p class="field-help">这些偏好会调整四项评分的权重，不会改变你对路径的自评。</p>
+            <div class="sliders">
+              <label class="slider-field" for="risk-tolerance">
+                <span>风险偏好 <output id="risk-value" for="risk-tolerance">3</output></span>
+                <input id="risk-tolerance" type="range" name="risk_tolerance" min="1" max="5" step="1" value="3" aria-describedby="risk-help">
+                <small id="risk-help"><span>1 谨慎</span><span>5 愿意探索</span></small>
+              </label>
+              <label class="slider-field" for="resources">
+                <span>资源储备 <output id="resources-value" for="resources">3</output></span>
+                <input id="resources" type="range" name="resources" min="1" max="5" step="1" value="3" aria-describedby="resources-help">
+                <small id="resources-help"><span>1 有限</span><span>5 充足</span></small>
+              </label>
+              <label class="slider-field" for="urgency">
+                <span>行动紧迫度 <output id="urgency-value" for="urgency">3</output></span>
+                <input id="urgency" type="range" name="urgency" min="1" max="5" step="1" value="3" aria-describedby="urgency-help">
+                <small id="urgency-help"><span>1 不着急</span><span>5 需尽快</span></small>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="ratings-group">
+            <legend>给每条路径做 1–5 分自评</legend>
+            <p id="rating-help" class="field-help">请用相同标准评分。成本负担的方向相反：1 代表低成本，5 代表高成本。</p>
+            <div class="rating-matrix" role="group" aria-describedby="rating-help">
+              <div class="rating-heading" aria-hidden="true"><span>比较维度</span><span>路径 A</span><span>路径 B</span></div>
+              <div class="rating-row">
+                <div class="rating-dimension"><span>成长空间</span><small>1 低 · 5 高</small></div>
+                <label class="rating-control"><span class="sr-only">路径 A 成长空间，1 分低，5 分高</span><input type="range" name="rating_a_growth" min="1" max="5" step="1" value="3"><output>3</output></label>
+                <label class="rating-control"><span class="sr-only">路径 B 成长空间，1 分低，5 分高</span><input type="range" name="rating_b_growth" min="1" max="5" step="1" value="3"><output>3</output></label>
+              </div>
+              <div class="rating-row">
+                <div class="rating-dimension"><span>稳定性</span><small>1 弱 · 5 强</small></div>
+                <label class="rating-control"><span class="sr-only">路径 A 稳定性，1 分弱，5 分强</span><input type="range" name="rating_a_stability" min="1" max="5" step="1" value="3"><output>3</output></label>
+                <label class="rating-control"><span class="sr-only">路径 B 稳定性，1 分弱，5 分强</span><input type="range" name="rating_b_stability" min="1" max="5" step="1" value="3"><output>3</output></label>
+              </div>
+              <div class="rating-row">
+                <div class="rating-dimension"><span>成本负担</span><small>1 低 · 5 高</small></div>
+                <label class="rating-control"><span class="sr-only">路径 A 成本负担，1 分低，5 分高</span><input type="range" name="rating_a_cost" min="1" max="5" step="1" value="3"><output>3</output></label>
+                <label class="rating-control"><span class="sr-only">路径 B 成本负担，1 分低，5 分高</span><input type="range" name="rating_b_cost" min="1" max="5" step="1" value="3"><output>3</output></label>
+              </div>
+              <div class="rating-row">
+                <div class="rating-dimension"><span>可逆性</span><small>1 难撤回 · 5 易调整</small></div>
+                <label class="rating-control"><span class="sr-only">路径 A 可逆性，1 分难撤回，5 分易调整</span><input type="range" name="rating_a_reversibility" min="1" max="5" step="1" value="3"><output>3</output></label>
+                <label class="rating-control"><span class="sr-only">路径 B 可逆性，1 分难撤回，5 分易调整</span><input type="range" name="rating_b_reversibility" min="1" max="5" step="1" value="3"><output>3</output></label>
+              </div>
+            </div>
+          </fieldset>
+
           <p id="form-error" class="form-error" role="alert"></p>
-          <button class="analyze-button" type="submit"><span>生成趋势推演</span><span class="button-arrow">↗</span></button>
-          <p class="privacy-note"><span>LOCAL SESSION</span> 输入内容仅用于本次分析，不会保存。</p>
+          <div class="form-actions">
+            <button id="load-example-button" class="secondary-button" type="button">加载示例</button>
+            <button class="analyze-button" type="submit"><span>比较这两条路径</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+          </div>
+          <p class="privacy-note"><span>LOCAL SESSION</span> 输入仅用于本次分析，不会保存；背景备注不参与评分。</p>
         </form>
 
-        <section id="results" class="results-panel" aria-live="polite">
-          <div class="empty-state" id="empty-state"><div class="empty-cross">+</div><p class="section-index">OUTPUT / 02</p><h2>等待你的变量</h2><p>完成左侧输入，开始一次面向未来的情景模拟。</p><div class="empty-lines"><span></span><span></span><span></span></div><small>分析结果不是预言，而是一种看见可能性的方式。</small></div>
+        <section id="results" class="results-panel" aria-label="分析结果">
+          <p id="result-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+          <h2 id="results-heading" class="sr-only">分析结果</h2>
+          <div class="empty-state" id="empty-state">
+            <div class="empty-cross" aria-hidden="true">+</div>
+            <p class="section-index">OUTPUT / 02</p>
+            <h2>等待你的评分</h2>
+            <p>填写两条路径，并用同一标准给四项条件做自评。</p>
+            <div class="empty-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <small>相近的结果会保留开放选择，不强行给出赢家。</small>
+          </div>
+
           <div id="result-content" class="result-content hidden">
-            <div class="result-header"><div><span class="section-index">OUTPUT / 02 <span class="result-time"></span></span><h2>你的未来推演</h2></div><button id="reset-button" class="text-button" type="button">重新推演 <span>↻</span></button></div>
-            <section class="trend-block"><div class="block-title"><span>01</span><h3>命运走势分析</h3><span id="confidence" class="confidence"></span></div><p id="trend-summary" class="trend-summary"></p><div id="drivers" class="driver-list"></div></section>
-            <section class="chart-block"><div class="block-title"><span>02</span><h3>三年能量路径</h3><span class="chart-legend"><i></i> A <i class="legend-b"></i> B</span></div><div class="chart-wrap"><div class="y-labels"><span>高</span><span>中</span><span>低</span></div><canvas id="energy-chart" aria-label="未来三年两条路径的能量变化曲线"></canvas></div><div class="chart-x"><span>现在</span><span>第 1 年</span><span>第 2 年</span><span>第 3 年</span></div><div id="path-keys" class="path-keys"></div></section>
-            <section class="phase-block"><div class="block-title"><span>03</span><h3>阶段推演</h3></div><div id="phases" class="phase-list"></div></section>
-            <section class="nodes-block"><div class="block-title"><span>04</span><h3>风险与机遇节点</h3></div><div id="nodes" class="node-list"></div></section>
-            <section class="recommendation"><div class="rec-top"><span class="section-index">DIRECTIONAL SIGNAL</span><span id="preferred-badge" class="preferred-badge"></span></div><h3 id="recommendation-title"></h3><p id="recommendation-summary"></p><div class="next-step"><span>NEXT MOVE / 90 DAYS</span><p id="next-step"></p></div></section>
+            <div class="result-header">
+              <div><span class="section-index">OUTPUT / 02</span><h2>当前条件比较</h2></div>
+              <button id="reset-button" class="text-button" type="button">回到输入 <span aria-hidden="true">↻</span></button>
+            </div>
+            <section class="trend-block" aria-labelledby="comparison-heading">
+              <div class="block-title"><span>01</span><h3 id="comparison-heading">当前输入下的比较</h3><span id="comparison-badge" class="comparison-badge"></span></div>
+              <p id="comparison-summary" class="trend-summary"></p>
+              <p id="comparison-note" class="comparison-note"></p>
+            </section>
+            <section class="sensitivity-section" aria-labelledby="sensitivity-heading">
+              <div class="block-title"><span>02</span><h3 id="sensitivity-heading">评分敏感性检查</h3><span id="sensitivity-badge" class="comparison-badge"></span></div>
+              <p id="sensitivity-summary" class="comparison-note"></p>
+              <ul id="sensitivity-details" class="sensitivity-details"></ul>
+            </section>
+            <section class="score-section" aria-labelledby="score-heading">
+              <div class="block-title"><span>03</span><h3 id="score-heading">得分依据 · 满分 100</h3></div>
+              <div id="score-cards" class="score-cards"></div>
+            </section>
+            <section class="market-evidence-section" aria-labelledby="market-evidence-heading">
+              <div class="block-title"><span>04</span><h3 id="market-evidence-heading">行业市场证据</h3></div>
+              <p id="market-evidence-summary" class="comparison-note"></p>
+              <div id="market-comparability" class="market-comparability"></div>
+              <div id="market-evidence-paths" class="market-evidence-paths"></div>
+              <p id="market-evidence-boundary" class="market-evidence-boundary">市场指标只用于核对假设，不转成分数或成功概率，也不会改变上述路径得分。</p>
+            </section>
+            <section class="weights-section" aria-labelledby="weights-heading">
+              <div class="block-title"><span>05</span><h3 id="weights-heading">本次权重</h3></div>
+              <p id="base-weights" class="field-help"></p>
+              <p class="field-help">偏好只调整权重。效用分 = 加分项按 1→0、5→100 换算；成本负担反向换算，再乘权重求和。总分范围 0–100。</p>
+              <ul id="weight-list" class="weight-list"></ul>
+              <ul id="weight-rules" class="weight-rules"></ul>
+            </section>
+            <section class="checkpoints-section" aria-labelledby="checkpoints-heading">
+              <div class="block-title"><span>06</span><h3 id="checkpoints-heading">复盘检查点</h3></div>
+              <div id="checkpoints" class="checkpoint-list"></div>
+            </section>
+            <section class="recommendation" aria-labelledby="recommendation-title">
+              <div class="rec-top"><span class="section-index">NEXT / 90 DAYS</span><span id="preferred-badge" class="preferred-badge"></span></div>
+              <h3 id="recommendation-title"></h3>
+              <p id="recommendation-summary"></p>
+              <div class="action-grid">
+                <article><h4>可执行实验</h4><p id="experiment"></p></article>
+                <article><h4>观察指标</h4><p id="metric"></p></article>
+                <article><h4>继续投入条件</h4><p id="continue-if"></p></article>
+                <article><h4>暂停或切换条件</h4><p id="pause-if"></p></article>
+              </div>
+            </section>
             <p id="caveat" class="caveat"></p>
           </div>
         </section>
       </section>
     </main>
-    <footer><span>ORACLE/03 <i>·</i> CYBER LIFE ANALYZER</span><span>SIMULATED TRENDS, HUMAN CHOICES</span></footer>
+    <footer><span>ORACLE/03 <i aria-hidden="true">·</i> CYBER LIFE ANALYZER</span><span>INPUTS, EVIDENCE, HUMAN CHOICES</span></footer>
   </div>
 </body>
 </html>
