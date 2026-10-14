@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07100f">
+  <title>赛博人生分析器 · ORACLE/03</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='2') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="赛博人生分析器首页"><span class="brand-mark">O</span><span>ORACLE<span class="brand-slash">/</span>03</span></a>
+      <div class="system-status"><i></i> SIMULATION ENGINE <span>ONLINE</span></div>
+      <div class="top-index">个人决策推演 <span>v1.0.4</span></div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow"><span>01</span> FUTURE SCENARIO MAPPER</p>
+          <h1>把人生的岔路口，<br><em>变成可读的信号。</em></h1>
+          <p class="intro-text">输入两个可能的选择。系统将结合你的状态，推演未来三年的趋势、变量与行动窗口。</p>
+        </div>
+        <div class="orbit" aria-hidden="true"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-core">?</div><span class="orbit-label label-a">PATH A</span><span class="orbit-label label-b">PATH B</span><span class="orbit-label label-c">YOU / NOW</span></div>
+        <div class="intro-foot"><span>DECISION SUPPORT SYSTEM</span><span>你的选择 · 你的变量 · 你的下一步</span></div>
+      </section>
+
+      <section class="workspace" aria-label="分析工作区">
+        <form id="analysis-form" class="input-panel">
+          <div class="panel-heading"><div><span class="section-index">INPUT / 01</span><h2>定义你的分岔</h2></div><span class="live-tag"><i></i> 等待输入</span></div>
+          <label class="field"><span>路径 A <small>你正在考虑的选项</small></span><input name="option_a" maxlength="80" required value="换一份更有成长空间的工作" autocomplete="off"></label>
+          <label class="field"><span>路径 B <small>另一种可能</small></span><input name="option_b" maxlength="80" required value="留在当前岗位继续积累" autocomplete="off"></label>
+          <label class="field"><span>当前背景 <small>哪些现实因素正在影响你？</small></span><textarea name="context" maxlength="300" rows="3" placeholder="例如：存款可支撑 6 个月，最近一年成长变慢……">目前工作稳定，但成长空间有限；希望在收入和长期发展之间找到平衡。</textarea><span class="char-count">0 / 300</span></label>
+          <div class="sliders">
+            <label class="slider-field"><span>风险偏好 <b data-value="risk_tolerance">3</b></span><input type="range" name="risk_tolerance" min="1" max="5" value="3"><small>谨慎 <i>·</i> 愿意探索</small></label>
+            <label class="slider-field"><span>资源储备 <b data-value="resources">3</b></span><input type="range" name="resources" min="1" max="5" value="3"><small>有限 <i>·</i> 充足</small></label>
+            <label class="slider-field"><span>行动紧迫度 <b data-value="urgency">3</b></span><input type="range" name="urgency" min="1" max="5" value="3"><small>不着急 <i>·</i> 需尽快</small></label>
+          </div>
+          <p id="form-error" class="form-error" role="alert"></p>
+          <button class="analyze-button" type="submit"><span>生成趋势推演</span><span class="button-arrow">↗</span></button>
+          <p class="privacy-note"><span>LOCAL SESSION</span> 输入内容仅用于本次分析，不会保存。</p>
+        </form>
+
+        <section id="results" class="results-panel" aria-live="polite">
+          <div class="empty-state" id="empty-state"><div class="empty-cross">+</div><p class="section-index">OUTPUT / 02</p><h2>等待你的变量</h2><p>完成左侧输入，开始一次面向未来的情景模拟。</p><div class="empty-lines"><span></span><span></span><span></span></div><small>分析结果不是预言，而是一种看见可能性的方式。</small></div>
+          <div id="result-content" class="result-content hidden">
+            <div class="result-header"><div><span class="section-index">OUTPUT / 02 <span class="result-time"></span></span><h2>你的未来推演</h2></div><button id="reset-button" class="text-button" type="button">重新推演 <span>↻</span></button></div>
+            <section class="trend-block"><div class="block-title"><span>01</span><h3>命运走势分析</h3><span id="confidence" class="confidence"></span></div><p id="trend-summary" class="trend-summary"></p><div id="drivers" class="driver-list"></div></section>
+            <section class="chart-block"><div class="block-title"><span>02</span><h3>三年能量路径</h3><span class="chart-legend"><i></i> A <i class="legend-b"></i> B</span></div><div class="chart-wrap"><div class="y-labels"><span>高</span><span>中</span><span>低</span></div><canvas id="energy-chart" aria-label="未来三年两条路径的能量变化曲线"></canvas></div><div class="chart-x"><span>现在</span><span>第 1 年</span><span>第 2 年</span><span>第 3 年</span></div><div id="path-keys" class="path-keys"></div></section>
+            <section class="phase-block"><div class="block-title"><span>03</span><h3>阶段推演</h3></div><div id="phases" class="phase-list"></div></section>
+            <section class="nodes-block"><div class="block-title"><span>04</span><h3>风险与机遇节点</h3></div><div id="nodes" class="node-list"></div></section>
+            <section class="recommendation"><div class="rec-top"><span class="section-index">DIRECTIONAL SIGNAL</span><span id="preferred-badge" class="preferred-badge"></span></div><h3 id="recommendation-title"></h3><p id="recommendation-summary"></p><div class="next-step"><span>NEXT MOVE / 90 DAYS</span><p id="next-step"></p></div></section>
+            <p id="caveat" class="caveat"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+    <footer><span>ORACLE/03 <i>·</i> CYBER LIFE ANALYZER</span><span>SIMULATED TRENDS, HUMAN CHOICES</span></footer>
+  </div>
+</body>
+</html>
